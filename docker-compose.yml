@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:14.7-alpine
+    env_file:
+      - .env
+    expose:
+      - 5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+    volumes:
+      - static:/app/static
+      - media:/app/media
+      - ./src:/app
+    env_file:
+      - .env
+    expose:
+      - 8000
+    depends_on:
+      - db
+    entrypoint: /wsgi-entrypoint.sh
+
+  nginx:
+    build:
+      context: docker/nginx
+      dockerfile: Dockerfile
+    ports:
+      - 80:80
+    volumes:
+      - ./docker/nginx/conf:/etc/nginx/conf.d
+      - static:/app/static
+      - media:/app/media
+    environment:
+      - BASE_URL=BASE_URL
+    depends_on:
+      - db
+      - api
+
+volumes:
+  static:
+  media:
+  postgres_data:
