@@ -43,7 +43,7 @@ class BookListSerializer(serializers.ListSerializer):
             'title': item.title,
             'author': item.author.full_name,
             'genre': item.genre.name,
-            'average_raiting': item.reviews.aggregate(Avg('rating'))['rating__avg'],
+            'average_rating': item.reviews.aggregate(Avg('rating'))['rating__avg'],
             'is_favorite': Favorite.objects.filter(user=user, book=item).exists(),
         } for item in item_list]
 
@@ -53,11 +53,11 @@ class BookSerializer(serializers.ModelSerializer):
     author = AuthorSerializer()
     is_favorite = serializers.SerializerMethodField()
     reviews = ReviewSerializer(many=True)
-    average_raiting = serializers.SerializerMethodField()
+    average_rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Book
-        fields = ['title', 'description', 'genre', 'author', 'average_raiting',
+        fields = ['title', 'description', 'genre', 'author', 'average_rating',
                   'publication_date', 'reviews', 'is_favorite']
         list_serializer_class = BookListSerializer
 
@@ -65,12 +65,5 @@ class BookSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         return Favorite.objects.filter(user=user, book=obj).exists()
 
-    def get_average_raiting(self, obj):
+    def get_average_rating(self, obj):
         return obj.reviews.aggregate(Avg('rating'))['rating__avg']
-
-
-class FavoriteSerializer(serializers.Serializer):
-    """
-    Empty serializer for adding/removing favorite books
-    """
-    pass

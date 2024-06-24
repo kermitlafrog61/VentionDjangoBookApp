@@ -10,20 +10,22 @@ from rest_framework.viewsets import GenericViewSet
 from .filters import BookFilter
 from .models import Book, Favorite, Review
 from .permissions import IsAuthor
-from .serializers import BookSerializer, FavoriteSerializer, ReviewSerializer
+from .serializers import BookSerializer, ReviewSerializer
 
 
 class BookViewSet(mixins.ListModelMixin,
                   mixins.RetrieveModelMixin,
                   GenericViewSet):
-    queryset = Book.objects.all()
+    queryset = Book.objects.all() \
+        .prefetch_related('reviews') \
+        .select_related(
+            'author',
+            'genre',
+        )
+    # queryset = Book.objects.all()
     permission_classes = [IsAuthenticated]
     filterset_class = BookFilter
-
-    def get_serializer_class(self):
-        if self.action == 'favorite':
-            return FavoriteSerializer
-        return BookSerializer
+    serializer_class = BookSerializer
 
     @action(methods=['POST'], detail=True)
     def favorite(self, request, pk=None):
@@ -35,7 +37,7 @@ class BookViewSet(mixins.ListModelMixin,
         else:
             Favorite.objects.create(user=request.user, book=book)
             return Response({'message': 'added to favorites'}, status=status.HTTP_201_CREATED)
-    
+
     @swagger_auto_schema(
         manual_parameters=[
             openapi.Parameter('genre', openapi.IN_QUERY,

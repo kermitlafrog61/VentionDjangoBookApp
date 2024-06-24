@@ -25,12 +25,15 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_yasg',
     'djoser',
+    'django_filters',
+    'debug_toolbar',
 
     # local apps
     'books',
 ]
 
 MIDDLEWARE = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -153,4 +156,11 @@ SWAGGER_SETTINGS = {
             'in': 'header'
         }
     }
+}
+
+
+# Debug Toolbar
+
+DEBUG_TOOLBAR_CONFIG = {
+    'SHOW_TOOLBAR_CALLBACK': lambda request: True,
 }

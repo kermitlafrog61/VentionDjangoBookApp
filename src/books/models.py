@@ -38,14 +38,18 @@ class Book(models.Model):
 class Review(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.TextField()
-    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='reviews')
+    book = models.ForeignKey(
+        Book, on_delete=models.CASCADE, related_name='reviews')
     rating = models.IntegerField(default=0, validators=[
         MinValueValidator(0),
         MaxValueValidator(5)
     ])
 
     def __str__(self) -> str:
-        return f"self.author.username - self.book.title"
+        return f"{self.author.username} --- {self.book.title}"
+
+    class Meta:
+        unique_together = ('author', 'book')
 
 
 class Favorite(models.Model):
